@@ -31,14 +31,14 @@ it we want to use some variables we've stored in config files:
 
 ```elixir
   # inside router or controller file
-  plug BasicAuth, Application.get_env(:the_app, :basic_auth)
+  plug BasicAuth, use_config: :otp_app
 ```
 
 And then we can setup some configuration using something like the following:
 
 ```elixir
 # dev.exs, test.exs
-config :the_app, :basic_auth, [
+config :otp_app, :basic_auth, [
   realm: "Admin Area",
   username: "sample",
   password: "sample"
@@ -47,7 +47,7 @@ config :the_app, :basic_auth, [
 
 ```elixir
 # config/prod.secret.exs
-config :the_app, :basic_auth, [
+config :otp_app, :basic_auth, [
   realm: "Admin Area",
   username: System.get_env("BASIC_AUTH_USER"),
   password: System.get_env("BASIC_AUTH_PASSWORD")
@@ -61,7 +61,7 @@ to use ENV vars for storing configuration.
 ## Testing controllers with Basic Auth
 
 If you're storing credentials within configuration files, we can reuse them within our test files
-directly using snippets like `Application.get_env(:basic_auth)[:username]`.
+directly using snippets like `Application.get_env(:otp_app, :basic_auth)[:username]`.
 
 ### Update Tests to insert a basic authentication header
 
@@ -74,8 +74,8 @@ explains a bit more about what needs to be done.
 At the top of my controller test I have something that looks like:
 
 ```elixir
-@username Application.get_env(:the_app, :basic_auth)[:username]
-@password Application.get_env(:the_app, :basic_auth)[:password]
+@username Application.get_env(:otp_app, :basic_auth)[:username]
+@password Application.get_env(:otp_app, :basic_auth)[:password]
 
 defp using_basic_auth(conn, username, password) do
   header_content = "Basic " <> Base.encode64("#{username}:#{password}")

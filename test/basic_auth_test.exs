@@ -78,7 +78,7 @@ defmodule BasicAuthTest do
     |> DemoPlugApplicationConfigured.call([])
 
     assert conn.status == 401
-    assert Plug.Conn.get_resp_header(conn, "www-authenticate") == [ "Basic realm=\"my realm\""]
+    assert Plug.Conn.get_resp_header(conn, "www-authenticate") == [ "Basic realm=\"#{realm}\""]
   end
 
   defp setup_application_config do
@@ -87,9 +87,7 @@ defmodule BasicAuthTest do
     password = "passw0rd"
     realm = "my realm"
 
-    Application.put_env(appname, :realm, realm)
-    Application.put_env(appname, :username, username)
-    Application.put_env(appname, :password, password)
+    Application.put_env(appname, :basic_auth, [realm: realm, username: username, password: password])
 
     {realm, username, password}
   end

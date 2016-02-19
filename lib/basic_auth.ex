@@ -35,8 +35,8 @@ defmodule BasicAuth do
     |> Plug.Conn.halt
   end
 
-  defp option_value([use_config: config_key], key) do
-    Application.get_env(config_key, key)
+  defp option_value([use_config: otp_app], key) do
+    Application.get_env(otp_app, :basic_auth)[key]
   end
 
   defp option_value(options, key) do
