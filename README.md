@@ -25,6 +25,19 @@ Add the package as a dependency in your Elixir project using something along the
 Add into the top of a controller, or into a router pipeline a plug declaration like:
 
 ```elixir
+  plug BasicAuth, callback: &User.find_by_username_and_password/2
+```
+
+  Where callback is your custom authentication function that takes a username and a 
+  password and returns a boolean.  This allows you to check the provided basic auth
+  credentials against a database.
+  
+
+Alternatively if you only want to allow a simple check against a static username and password
+you can provide a configuration like:
+
+
+```elixir
 plug BasicAuth, use_config: {:your_app, :your_key}
 ```
 
