@@ -39,13 +39,25 @@ defmodule BasicAuth do
                 password: config_option(config_options, configuration, :password),
                 realm:    config_option(config_options, configuration, :realm)}
   end
+
+  def init([callback: callback]) do
+    %{callback: callback}
+  end
+
   def init(_) do
     raise ArgumentError, """
 
     Usage of BasicAuth is:
     plug BasicAuth, use_config: {:your_app, :your_key}
 
-    Where :your_app and :your_key should refer to values in your application config. Maybe there was a typo?
+    Where :your_app and :your_key should refer to values in your application config. 
+
+    OR
+
+    plug BasicAuth, callback: &your_function/2
+
+    Where your_function takes a username and password and returns a boolean.  Your your_function
+    can check a database for example.
     """
   end
 
@@ -64,14 +76,24 @@ defmodule BasicAuth do
       """
   end
 
+  defp valid_credentials?(["Basic " <> encoded_string], %{callback: callback}) do
+    [username, password] = Base.decode64!(encoded_string) |> String.split(":")
+    callback.(username, password)
+  end
   defp valid_credentials?(["Basic " <> encoded_string], %{username: username, password: password}) do
-    Base.decode64!(encoded_string)  == "#{to_value(username)}:#{to_value(password)}"
+    Base.decode64!(encoded_string) == "#{to_value(username)}:#{to_value(password)}"
   end
   defp valid_credentials?(_,_), do: false
 
   defp send_unauthorized_response(conn, %{realm: realm}) do
     conn
     |> Plug.Conn.put_resp_header("www-authenticate", "Basic realm=\"#{to_value(realm)}\"")
+    |> Plug.Conn.send_resp(401, "401 Unauthorized")
+    |> Plug.Conn.halt
+  end
+
+  defp send_unauthorized_response(conn, %{}) do
+    conn
     |> Plug.Conn.send_resp(401, "401 Unauthorized")
     |> Plug.Conn.halt
   end

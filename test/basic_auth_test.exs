@@ -13,6 +13,54 @@ defmodule BasicAuthTest do
     end
   end
 
+  defmodule DemoPlugWithModule do
+    defmacro __using__(function) do
+      quote bind_quoted: [function: function] do
+        use Plug.Builder
+        plug BasicAuth, callback: function
+        plug :index
+        defp index(conn, _opts), do: conn |> send_resp(200, "OK")
+      end
+    end
+  end
+
+  describe "custom function" do
+    defmodule User do
+      def find_by_username_and_password(username, password) do
+        username == "robert" && password == "secret"
+      end
+    end
+
+    defmodule SimpleDemoPlugWithModule do
+      use DemoPlugWithModule, &User.find_by_username_and_password/2
+    end
+
+    test "no credentials provided" do
+      conn = conn(:get, "/")
+      |> SimpleDemoPlugWithModule.call([])
+      assert conn.status == 401
+    end
+
+    test "wrong credentials provided" do
+      header_content = "Basic " <> Base.encode64("bad:credentials")
+
+      conn = conn(:get, "/")
+      |> put_req_header("authorization", header_content)
+      |> SimpleDemoPlugWithModule.call([])
+      assert conn.status == 401
+    end
+
+    test "right credentials provided" do
+      header_content = "Basic " <> Base.encode64("robert:secret")
+
+      conn = conn(:get, "/")
+      |> put_req_header("authorization", header_content)
+      |> SimpleDemoPlugWithModule.call([])
+      assert conn.status == 200
+    end
+    
+  end
+
   describe "credential checking" do
     defmodule SimpleDemoPlug do
       use DemoPlug, :my_auth
