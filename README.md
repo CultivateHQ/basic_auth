@@ -1,8 +1,14 @@
 # BasicAuth
 
 This is an Elixir Plug for adding basic authentication into an application.
-You can either provide a static application configuration or a custom
-authentication function.
+
+The plug can be configured to use:
+
+1) Static username and password in application configuration
+
+-OR-
+
+2) Your own custom authentication function
 
 ## Breaking change
 
@@ -54,7 +60,7 @@ plug BasicAuth, use_config: {:your_app, :your_key}
   ```
 
 Alternatively you can provide a custom function to the plug to authenticate the user any way
-you want, such as finding from a database.
+you want, such as finding the user from a database.
 
 ```elixir
   plug BasicAuth, callback: &User.find_by_username_and_password/3
