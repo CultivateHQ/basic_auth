@@ -26,13 +26,17 @@ defmodule BasicAuthTest do
 
   describe "custom function" do
     defmodule User do
-      def find_by_username_and_password(username, password) do
-        username == "robert" && password == "secret"
+      def find_by_username_and_password(conn, username, password) do
+        if username == "robert" && password == "secret" do
+          Plug.Conn.assign(conn, :current_user, %{name: "robert"})
+        else
+          Plug.Conn.halt(conn)
+        end
       end
     end
 
     defmodule SimpleDemoPlugWithModule do
-      use DemoPlugWithModule, &User.find_by_username_and_password/2
+      use DemoPlugWithModule, &User.find_by_username_and_password/3
     end
 
     test "no credentials provided" do

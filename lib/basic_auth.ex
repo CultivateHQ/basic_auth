@@ -47,27 +47,47 @@ defmodule BasicAuth do
   def init(_) do
     raise ArgumentError, """
 
-    Usage of BasicAuth is:
+    Usage of BasicAuth using application config:
     plug BasicAuth, use_config: {:your_app, :your_key}
+    
+    -OR-
+    Using custom authentication function:
+    plug BasicAuth, callback: &MyCustom.function/3
 
-    Where :your_app and :your_key should refer to values in your application config. 
-
-    OR
-
-    plug BasicAuth, callback: &your_function/2
-
-    Where your_function takes a username and password and returns a boolean.  Your your_function
-    can check a database for example.
+    Where :callback takes a conn, username and password and returns a conn.  
     """
   end
 
   def call(conn, options) do
     header_content = Plug.Conn.get_req_header(conn, "authorization")
-    respond(valid_credentials?(header_content, options), conn, options)
+    respond(conn, header_content, options)
+  end
+  
+  defp respond(conn, ["Basic " <> encoded_string], options) do
+    [username, password] = Base.decode64!(encoded_string) |> String.split(":")
+    respond(conn, username, password, options)
   end
 
-  defp respond(true, conn, _), do: conn
-  defp respond(false, conn, options), do: send_unauthorized_response(conn, options)
+  defp respond(conn, _, options) do
+    send_unauthorized_response(conn, options)
+  end
+
+  defp respond(conn, username, password, %{callback: callback}) do
+    conn = callback.(conn, username, password)
+    if conn.halted do
+      send_unauthorized_response(conn, %{})
+    else
+      conn
+    end
+  end
+
+  defp respond(conn, username, password, %{username: config_usr, password: config_pwd, realm: realm}) do
+    if {username, password} == {to_value(config_usr), to_value(config_pwd)} do
+      conn
+    else
+      send_unauthorized_response(conn, %{realm: realm})
+    end
+  end
 
   defp config_option({app, config_key}, configuration, key) do
     Keyword.get(configuration, key) ||
@@ -76,15 +96,6 @@ defmodule BasicAuth do
       """
   end
 
-  defp valid_credentials?(["Basic " <> encoded_string], %{callback: callback}) do
-    [username, password] = Base.decode64!(encoded_string) |> String.split(":")
-    callback.(username, password)
-  end
-  defp valid_credentials?(["Basic " <> encoded_string], %{username: username, password: password}) do
-    Base.decode64!(encoded_string) == "#{to_value(username)}:#{to_value(password)}"
-  end
-  defp valid_credentials?(_,_), do: false
-
   defp send_unauthorized_response(conn, %{realm: realm}) do
     conn
     |> Plug.Conn.put_resp_header("www-authenticate", "Basic realm=\"#{to_value(realm)}\"")
@@ -92,7 +103,7 @@ defmodule BasicAuth do
     |> Plug.Conn.halt
   end
 
-  defp send_unauthorized_response(conn, %{}) do
+  defp send_unauthorized_response(conn, _) do
     conn
     |> Plug.Conn.send_resp(401, "401 Unauthorized")
     |> Plug.Conn.halt
