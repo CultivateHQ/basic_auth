@@ -73,6 +73,20 @@ you want, such as finding the user from a database.
 
 Easy as that!
 
+### Authenticating only for specific actions
+
+If you're looking to authenticate only for a subset of actions in a controller you can use plug's `when action in` syntax as shown below
+
+  ```elixir
+    plug BasicAuth, [use_config: {: your_app, : your_key}] when action in [:edit, :delete]
+  ```
+
+  additionally you can exclude specific actions using `not`
+
+  ```elixir
+    plug BasicAuth, [use_config: {: your_app, : your_key}] when not action in [:index, :show]
+  ```
+
 ## Testing controllers with Basic Auth
 
 If you're storing credentials within configuration files, we can reuse them within our test files
