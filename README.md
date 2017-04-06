@@ -66,6 +66,12 @@ you want, such as finding the user from a database.
   plug BasicAuth, callback: &User.find_by_username_and_password/3
 ```
 
+  (or optionally provide a realm)
+
+```elixir
+  plug BasicAuth, callback: &User.find_by_username_and_password/3, realm: "My super realm"
+```
+
   Where :callback is your custom authentication function that takes a conn, username and a
   password and returns a conn.  Your function must return `Plug.Conn.halt(conn)` if authentication
   fails, otherwise you can use `Plug.Conn.assign(conn, :current_user, ...)` to enhance
