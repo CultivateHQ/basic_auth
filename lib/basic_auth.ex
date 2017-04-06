@@ -51,8 +51,12 @@ defmodule BasicAuth do
                 realm:    config_option(config_options, configuration, :realm)}
   end
 
+  def init([callback: callback, realm: realm]) do
+    %{callback: callback, realm: realm}
+  end
+
   def init([callback: callback]) do
-    %{callback: callback}
+    %{callback: callback, realm: "Basic Authentication"}
   end
 
   def init(_) do
