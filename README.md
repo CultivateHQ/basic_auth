@@ -93,6 +93,31 @@ If you're looking to authenticate only for a subset of actions in a controller y
     plug BasicAuth, [use_config: {: your_app, : your_key}] when not action in [:index, :show]
   ```
 
+## Specify controllers that use Basic Auth
+
+If you want to use Basic Auth only for designated controllers, you can do so by modifying `web/router.ex`
+
+```elixir
+# web/router.ex
+
+# create a new pipeline like this
+pipeline :basic_auth do
+  plug BasicAuth, Application.get_env(:the_app, :basic_auth)
+  plug :accepts, ["html"]
+  plug :fetch_session
+  plug :fetch_flash
+  plug :protect_from_forgery
+  plug :put_secure_browser_headers
+end
+
+# and a scope
+scope "/", TheApp do
+  pipe_through :basic_auth
+
+  resources "/users", UserController
+end
+```
+
 ## Testing controllers with Basic Auth
 
 If you're storing credentials within configuration files, we can reuse them within our test files
