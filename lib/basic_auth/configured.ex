@@ -7,6 +7,8 @@ defmodule BasicAuth.Configured do
 
   defstruct config_options: nil
 
+  alias Plug.Crypto
+
   def init(config_options) do
      %__MODULE__{config_options: config_options}
   end
@@ -23,7 +25,7 @@ defmodule BasicAuth.Configured do
   end
 
   defp check_token(conn, token, options = %__MODULE__{config_options: config_options}) do
-    if token  == configured_token(config_options) do
+    if Crypto.secure_compare(token, configured_token(config_options)) do
       conn
     else
       send_unauthorised_response(conn, options)
