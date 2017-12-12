@@ -10,12 +10,20 @@ The plug can be configured to use:
 
 2) Your own custom authentication function
 
+Note that if using option (1), prior to 2.2.1 the library was vulnerable to [timing attacks](https://codahale.com/a-lesson-in-timing-attacks/);
+we suggest updating `~> 2.2.2`.
+
+If you are using your own custom authentication function, then you are are on your own.
+([Plug.Crypto.secure_compare/2](https://hexdocs.pm/plug/1.5.0-rc.0/Plug.Crypto.html#secure_compare/2) is something that may help you compare
+binaries in constant time.)
+
+
 ## How to use
 
 Add the package as a dependency in your Elixir project using something along the lines of:
 ```elixir
   defp deps do
-    [{:basic_auth, "~> 2.2"}]
+    [{:basic_auth, "~> 2.2.2"}]
   end
 ```
 
@@ -38,8 +46,8 @@ plug BasicAuth, use_config: {:your_app, :your_config}
   ]
   ```
 
-As of v2.2.0, all configuration is read at runtime to support using 
-[REPLACE_OS_VARS](http://michal.muskala.eu/2017/07/30/configuring-elixir-libraries.html#distillerys-replaceosvars) 
+All configuration is read at runtime to support using
+[REPLACE_OS_VARS](http://michal.muskala.eu/2017/07/30/configuring-elixir-libraries.html#distillerys-replaceosvars)
 as part of a release.
 
   or choose to get one (or all) from environment variables, eg
@@ -80,20 +88,20 @@ It will receive a connection, username, and password.
 
 Easy as that!
 
+
 ### Authenticating only for specific actions
 
 If you're looking to authenticate only for a subset of actions in a controller you can use plug's `when action in` syntax as shown below
 
-  ```elixir
-    plug BasicAuth, [use_config: {:your_app, :your_config}] when action in [:edit, :delete]
-  ```
+```elixir
+plug BasicAuth, [use_config: {: your_app, : your_config}] when action in [:edit, :delete]
+```
 
   additionally you can exclude specific actions using `not`
 
-  ```elixir
-    plug BasicAuth, [use_config: {:your_app, :your_config}] when not action in [:index, :show]
-  ```
-
+```elixir
+plug BasicAuth, [use_config: {: your_app, : your_config}] when not action in [:index, :show]
+```
 ## Testing controllers with Basic Auth
 
 If you're storing credentials within configuration files, we can reuse them within our test files
