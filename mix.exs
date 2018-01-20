@@ -24,9 +24,9 @@ defmodule BasicAuth.Mixfile do
 
   defp deps do
     [
-     {:plug, "~> 0.14 or ~> 1.0"},
+     {:plug, "~> 1.5.0-rc.0"},
      {:ex_doc, ">= 0.0.0", only: :dev},
-     {:cowboy, "~> 1.0"},
+     {:cowboy, "~> 2.1"},
      {:credo, ">= 0.0.0", only: [:dev, :test]},
     ]
   end
