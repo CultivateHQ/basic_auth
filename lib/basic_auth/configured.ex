@@ -13,23 +13,23 @@ defmodule BasicAuth.Configured do
      %__MODULE__{config_options: config_options}
   end
 
-  def respond(conn, ["Basic " <> encoded], options) do
+  def respond(conn, params, options) do
     if skip_authentication?(options) do
       conn
     else
-      case Base.decode64(encoded) do
-        {:ok, token} -> check_token(conn, token, options)
-        _ ->
-          send_unauthorised_response(conn, options)
-      end
+      authenticate(conn, params, options)
     end
   end
-  def respond(conn, _, options) do
-    if skip_authentication?(options) do
-      conn
-    else
-      send_unauthorised_response(conn, options)
+
+  def authenticate(conn, ["Basic " <> encoded], options) do
+    case Base.decode64(encoded) do
+      {:ok, token} -> check_token(conn, token, options)
+      _ ->
+        send_unauthorised_response(conn, options)
     end
+  end
+  def authenticate(conn, _, options) do
+    send_unauthorised_response(conn, options)
   end
 
   defp check_token(conn, token, options = %__MODULE__{config_options: config_options}) do

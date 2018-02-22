@@ -128,7 +128,7 @@ defmodule BasicAuth.ConfiguredTest do
         username: nil,
         password: nil,
         realm: "Admin Area",
-        skip_if_no_credentials_configured: true,
+        skip_if_no_credentials_configured: true
       )
 
       conn = call_without_credentials(SimplePlug)
@@ -140,7 +140,7 @@ defmodule BasicAuth.ConfiguredTest do
         username: "admin",
         password: "simple:password",
         realm: "Admin Area",
-        skip_if_no_credentials_configured: true,
+        skip_if_no_credentials_configured: true
       )
 
       conn = call_without_credentials(SimplePlug)
@@ -152,7 +152,7 @@ defmodule BasicAuth.ConfiguredTest do
         username: "admin",
         password: "simple:password",
         realm: "Admin Area",
-        skip_if_no_credentials_configured: true,
+        skip_if_no_credentials_configured: true
       )
 
       conn = call_with_credentials(SimplePlug, "admin:simple:password")
