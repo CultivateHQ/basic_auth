@@ -60,6 +60,17 @@ as part of a release.
   ]
   ```
 
+  If you want to skip authentication instead of `ArgumentError` if no credentials are provided (environment variables are not set) you can use `skip_if_no_credentials_configured` option
+
+  ```elixir
+  config :basic_auth, my_auth_with_system: [
+    username: {:system, "BASIC_AUTH_USERNAME"},
+    password: {:system, "BASIC_AUTH_PASSWORD"},
+    realm:    {:system, "BASIC_AUTH_REALM"},
+    skip_if_no_credentials_configured: true
+  ]
+  ```
+
 Alternatively you can provide a custom function to the plug to authenticate the user any way
 you want, such as finding the user from a database.
 
