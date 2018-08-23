@@ -31,4 +31,4 @@ Following reverse engineered from the Git log for the last few minor version inc
 
 * Allow passwords to contain a colon, from https://github.com/CultivateHQ/basic_auth/pull/28
 * Various documentation fixes
-* Invalid basic auth base64 encoding should returns a 401 https://github.com/CultivateHQ/basic_auth/pull/24
+* Invalid basic auth base64 encoding should return a 401 https://github.com/CultivateHQ/basic_auth/pull/24
