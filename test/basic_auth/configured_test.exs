@@ -1,10 +1,12 @@
 defmodule BasicAuth.ConfiguredTest do
   use ExUnit.Case, async: true
   use Plug.Test
-  import BasicAuth.TestHelper, only: [
-    call_without_credentials: 1,
-    call_with_credentials: 2,
-  ]
+
+  import BasicAuth.TestHelper,
+    only: [
+      call_without_credentials: 1,
+      call_with_credentials: 2
+    ]
 
   defmodule SimplePlug do
     use DemoPlug, use_config: {:basic_auth, :my_auth}
@@ -16,22 +18,29 @@ defmodule BasicAuth.ConfiguredTest do
   end
 
   describe "with username and password directly from configuration" do
-
     setup do
-      Application.put_env(:basic_auth, :my_auth, username: "admin",
-        password: "simple:password", realm: "Admin Area")
+      Application.put_env(
+        :basic_auth,
+        :my_auth,
+        username: "admin",
+        password: "simple:password",
+        realm: "Admin Area"
+      )
     end
 
     test "no credentials returns a 401" do
       conn = call_without_credentials(SimplePlug)
       assert conn.status == 401
-      assert Plug.Conn.get_resp_header(conn, "www-authenticate") == [ "Basic realm=\"Admin Area\""]
+      assert Plug.Conn.get_resp_header(conn, "www-authenticate") == ["Basic realm=\"Admin Area\""]
     end
 
     test "default realm" do
       Application.put_env(:basic_auth, :my_auth, username: "admin", password: "simple:password")
       conn = call_without_credentials(SimplePlug)
-      assert Plug.Conn.get_resp_header(conn, "www-authenticate") == [ "Basic realm=\"Basic Authentication\""]
+
+      assert Plug.Conn.get_resp_header(conn, "www-authenticate") == [
+               "Basic realm=\"Basic Authentication\""
+             ]
     end
 
     test "invalid credentials returns a 401" do
@@ -42,9 +51,10 @@ defmodule BasicAuth.ConfiguredTest do
     test "incorrect header returns a 401" do
       header_content = "Banana " <> Base.encode64("admin:simple:password")
 
-      conn = conn(:get, "/")
-      |> put_req_header("authorization", header_content)
-      |> SimplePlug.call([])
+      conn =
+        conn(:get, "/")
+        |> put_req_header("authorization", header_content)
+        |> SimplePlug.call([])
 
       assert conn.status == 401
     end
@@ -57,9 +67,10 @@ defmodule BasicAuth.ConfiguredTest do
     test "invalid basic auth base64 encoding returns a 401" do
       header_content = "Basic " <> "malformed base64"
 
-      conn = conn(:get, "/")
-      |> put_req_header("authorization", header_content)
-      |> SimplePlug.call([])
+      conn =
+        conn(:get, "/")
+        |> put_req_header("authorization", header_content)
+        |> SimplePlug.call([])
 
       assert conn.status == 401
     end
@@ -71,13 +82,15 @@ defmodule BasicAuth.ConfiguredTest do
   end
 
   describe "configured to get username and password from System" do
-
     setup do
-      Application.put_env(:basic_auth, :my_auth, [
-            username: {:system, "USERNAME"},
-            password: {:system, "PASSWORD"},
-            realm: {:system, "REALM"},
-          ])
+      Application.put_env(
+        :basic_auth,
+        :my_auth,
+        username: {:system, "USERNAME"},
+        password: {:system, "PASSWORD"},
+        realm: {:system, "REALM"}
+      )
+
       :ok
     end
 
@@ -92,17 +105,19 @@ defmodule BasicAuth.ConfiguredTest do
     test "realm" do
       System.put_env("REALM", "Banana")
       conn = call_without_credentials(SimplePlug)
-      assert Plug.Conn.get_resp_header(conn, "www-authenticate") == [ "Basic realm=\"Banana\""]
+      assert Plug.Conn.get_resp_header(conn, "www-authenticate") == ["Basic realm=\"Banana\""]
     end
   end
 
   describe "missing configuration" do
-
     setup do
       header_content = "Basic " <> Base.encode64("doesnotreallymatter")
-      conn = :get
-      |> conn("/")
-      |> put_req_header("authorization", header_content)
+
+      conn =
+        :get
+        |> conn("/")
+        |> put_req_header("authorization", header_content)
+
       {:ok, conn: conn}
     end
 

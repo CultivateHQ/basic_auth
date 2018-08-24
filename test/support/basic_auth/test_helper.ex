@@ -3,6 +3,7 @@ defmodule BasicAuth.TestHelper do
 
   def call_with_credentials(plug, authentication) do
     header_content = "Basic " <> Base.encode64(authentication)
+
     :get
     |> conn("/")
     |> put_req_header("authorization", header_content)

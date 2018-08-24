@@ -10,16 +10,19 @@ defmodule BasicAuth.Configured do
   alias Plug.Crypto
 
   def init(config_options) do
-     %__MODULE__{config_options: config_options}
+    %__MODULE__{config_options: config_options}
   end
 
   def respond(conn, ["Basic " <> encoded], options) do
     case Base.decode64(encoded) do
-      {:ok, token} -> check_token(conn, token, options)
+      {:ok, token} ->
+        check_token(conn, token, options)
+
       _ ->
         send_unauthorised_response(conn, options)
     end
   end
+
   def respond(conn, _, options) do
     send_unauthorised_response(conn, options)
   end

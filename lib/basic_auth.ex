@@ -1,5 +1,4 @@
 defmodule BasicAuth do
-
   @moduledoc """
   Plug for adding basic authentication.
   """
@@ -9,7 +8,7 @@ defmodule BasicAuth do
     defstruct callback: nil, realm: nil
   end
 
-  def init([use_config: config_options]) do
+  def init(use_config: config_options) do
     BasicAuth.Configured.init(config_options)
   end
 
@@ -41,6 +40,7 @@ defmodule BasicAuth do
   defp respond(conn, header_content, config_options = %BasicAuth.Configured{}) do
     BasicAuth.Configured.respond(conn, header_content, config_options)
   end
+
   defp respond(conn, header_content, config_options = %BasicAuth.WithCallback{}) do
     BasicAuth.WithCallback.respond(conn, header_content, config_options)
   end

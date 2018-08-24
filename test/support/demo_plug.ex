@@ -14,8 +14,8 @@ defmodule DemoPlug do
   defmacro __using__(args) do
     quote bind_quoted: [args: args] do
       use Plug.Builder
-      plug BasicAuth, args
-      plug :index
+      plug(BasicAuth, args)
+      plug(:index)
       defp index(conn, _opts), do: conn |> send_resp(200, "OK")
     end
   end
