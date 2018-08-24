@@ -1,6 +1,10 @@
 defmodule BasicAuth.TestHelper do
   use Plug.Test
 
+  @moduledoc """
+  Adds some helper functions for use in tests.
+  """
+
   def call_with_credentials(plug, authentication) do
     header_content = "Basic " <> Base.encode64(authentication)
 
