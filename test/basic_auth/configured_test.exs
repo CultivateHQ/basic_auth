@@ -119,5 +119,44 @@ defmodule BasicAuth.ConfiguredTest do
       Application.put_env(:basic_auth, :my_auth, username: "admin")
       assert_raise(ArgumentError, ~r/Missing/, fn -> SimplePlug.call(conn, []) end)
     end
+
+  end
+
+  describe "with skip_if_no_credentials_configured option" do
+    test "skips authentication if no credentials configured" do
+      Application.put_env(:basic_auth, :my_auth,
+        username: nil,
+        password: nil,
+        realm: "Admin Area",
+        skip_if_no_credentials_configured: true
+      )
+
+      conn = call_without_credentials(SimplePlug)
+      assert conn.status == 200
+    end
+
+    test "doesn't authenticate if credentials don't match" do
+      Application.put_env(:basic_auth, :my_auth,
+        username: "admin",
+        password: "simple:password",
+        realm: "Admin Area",
+        skip_if_no_credentials_configured: true
+      )
+
+      conn = call_without_credentials(SimplePlug)
+      assert conn.status == 401
+    end
+
+    test "authenticates if credentials match" do
+      Application.put_env(:basic_auth, :my_auth,
+        username: "admin",
+        password: "simple:password",
+        realm: "Admin Area",
+        skip_if_no_credentials_configured: true
+      )
+
+      conn = call_with_credentials(SimplePlug, "admin:simple:password")
+      assert conn.status == 200
+    end
   end
 end
