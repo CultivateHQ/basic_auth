@@ -89,6 +89,43 @@ It will receive a connection, username, and password.
 Easy as that!
 
 
+### Authenticating with custom response body
+
+If you want using custom unauthorized response you can pass `custom_response` in configuration like:
+
+```elixir
+
+config :your_app, your_config: [
+    username: "admin",
+    password: "simple_password",
+    realm: "Admin Area",
+    custom_response: &YouApp.Helpers.unauthorized_response/1
+  ]
+```
+
+or
+
+```elixir
+
+plug BasicAuth,
+    callback: &User.find_by_username_and_password/3,
+    realm: "Area 51",
+    custom_response: &YouApp.Helpers.unauthorized_response/1
+```
+
+Where `:custom_response` is you custom response function that takes a `conn`. Example:
+
+```elixir
+
+def unauthorized_response(conn) do
+    conn
+    |> Plug.Conn.put_resp_content_type("application/json")
+    |> Plug.Conn.send_resp(401, ~s[{"message": "Unauthorized"}])
+  end
+
+```
+
+
 ### Authenticating only for specific actions
 
 If you're looking to authenticate only for a subset of actions in a controller you can use plug's `when action in` syntax as shown below

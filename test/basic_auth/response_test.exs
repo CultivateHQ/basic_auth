@@ -9,7 +9,7 @@ defmodule BasicAuth.ResponseTest do
       header =
         :get
         |> conn("/")
-        |> Response.unauthorise("Freddy's Kingdom")
+        |> Response.unauthorise("Freddy's Kingdom", nil)
         |> Conn.get_resp_header("www-authenticate")
 
       assert ["Basic realm=\"Freddy's Kingdom\""] == header
@@ -19,7 +19,7 @@ defmodule BasicAuth.ResponseTest do
       header =
         :get
         |> conn("/")
-        |> Response.unauthorise(nil)
+        |> Response.unauthorise(nil, nil)
         |> Conn.get_resp_header("www-authenticate")
 
       assert ["Basic realm=\"Basic Authentication\""] == header
@@ -29,7 +29,7 @@ defmodule BasicAuth.ResponseTest do
       header =
         :get
         |> conn("/")
-        |> Response.unauthorise(nil)
+        |> Response.unauthorise(nil, nil)
         |> Conn.get_resp_header("content-type")
 
       assert ["text/plain; charset=utf-8"] == header
@@ -39,9 +39,20 @@ defmodule BasicAuth.ResponseTest do
       conn =
         :get
         |> conn("/")
-        |> Response.unauthorise(nil)
+        |> Response.unauthorise(nil, nil)
 
       assert conn.status == 401
+    end
+
+    test "with custom response" do
+      conn =
+        :get
+        |> conn("/")
+        |> Response.unauthorise(nil, &BasicAuth.TestHelper.custom_response/1)
+
+      assert conn.status == 401
+      assert Plug.Conn.get_resp_header(conn, "content-type") == ["application/json; charset=utf-8"]
+      assert conn.resp_body == ~s[{"message": "Unauthorized"}]
     end
   end
 end

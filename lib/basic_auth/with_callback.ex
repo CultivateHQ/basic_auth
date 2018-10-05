@@ -3,17 +3,18 @@ defmodule BasicAuth.WithCallback do
   Basic auth plugin functions callback to a provided function with credentials
   """
 
-  import BasicAuth.Response, only: [unauthorise: 2]
+  import BasicAuth.Response, only: [unauthorise: 3]
 
-  defstruct callback: nil, realm: nil
+  defstruct callback: nil, realm: nil, custom_response: nil
 
   def init(options) when is_list(options) do
     callback = Keyword.fetch!(options, :callback)
     realm = Keyword.get(options, :realm)
+    custom_response = Keyword.get(options, :custom_response)
 
     case :erlang.fun_info(callback)[:arity] do
       3 ->
-        %__MODULE__{callback: callback, realm: realm}
+        %__MODULE__{callback: callback, realm: realm, custom_response: custom_response}
 
       _ ->
         raise(
@@ -57,13 +58,13 @@ defmodule BasicAuth.WithCallback do
     end
   end
 
-  defp send_unauthorised_response(conn, %{realm: realm}) do
-    unauthorise(conn, realm)
+  defp send_unauthorised_response(conn, %{realm: realm, custom_response: custom_response}) do
+    unauthorise(conn, realm, custom_response)
   end
 
-  defp halt_and_unauthorise_response(conn, %{realm: realm}) do
+  defp halt_and_unauthorise_response(conn, %{realm: realm, custom_response: custom_response}) do
     conn
-    |> unauthorise(realm)
+    |> unauthorise(realm, custom_response)
     |> Plug.Conn.halt()
   end
 end

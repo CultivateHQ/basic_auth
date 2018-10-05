@@ -19,4 +19,10 @@ defmodule BasicAuth.TestHelper do
     |> conn("/")
     |> plug.call([])
   end
+
+  def custom_response(conn) do
+    conn
+    |> Plug.Conn.put_resp_content_type("application/json")
+    |> Plug.Conn.send_resp(401, ~s[{"message": "Unauthorized"}])
+  end
 end

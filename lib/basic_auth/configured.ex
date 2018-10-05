@@ -3,7 +3,7 @@ defmodule BasicAuth.Configured do
   Basic auth plugin functions that retrieve credentials from application config.
   """
 
-  import BasicAuth.Response, only: [unauthorise: 2]
+  import BasicAuth.Response, only: [unauthorise: 3]
 
   defstruct config_options: nil
 
@@ -37,7 +37,7 @@ defmodule BasicAuth.Configured do
 
   defp send_unauthorised_response(conn, %__MODULE__{config_options: config_options}) do
     conn
-    |> unauthorise(realm(config_options))
+    |> unauthorise(realm(config_options), custom_response(config_options))
     |> Plug.Conn.halt()
   end
 
@@ -53,6 +53,12 @@ defmodule BasicAuth.Configured do
   defp password(config_options), do: credential_part!(config_options, :password)
 
   defp realm(config_options), do: credential_part(config_options, :realm)
+
+  defp custom_response({app, key}) do
+    app
+    |> Application.fetch_env!(key)
+    |> Keyword.get(:custom_response)
+  end
 
   defp credential_part({app, key}, part) do
     app
